@@ -53,6 +53,22 @@
   when: bgp.redistribute is defined and bgp.enable
   register: bgp_output
 
+- name: set BGP log neighbor changes
+  eos_config:
+    section='router bgp {{ bgp.bgp_as }}'
+    regexp='(?<=[^no ] )bgp log-neighbor-changes'
+    command='bgp log-neighbor-changes'
+    username={{ eapi.username|default(omit) }}
+    password={{ eapi.password|default(omit) }}
+    enablepwd={{ eapi.enablepwd|default(omit) }}
+    transport={{ eapi.transport|default(omit) }}
+    connection={{ eapi.connection|default(omit) }}
+    host={{ eapi.host|default(omit) }}
+    port={{ eapi.port|default(omit) }}
+    debug={{ eos.debug|default(omit) }}
+  when: bgp.log_neighbor_changes and bgp.enable
+  register: bgp_output
+
 - name: set BGP timers
   eos_config:
     section='router bgp {{ bgp.bgp_as }}'
