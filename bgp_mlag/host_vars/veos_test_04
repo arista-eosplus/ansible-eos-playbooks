@@ -25,12 +25,6 @@ ip_interfaces:
   - name: Ethernet2
     address: 10.1.2.3/31
 
-eos_switchports:
-  - name: Ethernet1
-    mode: trunk
-  - name: Ethernet2
-    mode: trunk
-
 bgp:
   enable: true
   bgp_as: 65002

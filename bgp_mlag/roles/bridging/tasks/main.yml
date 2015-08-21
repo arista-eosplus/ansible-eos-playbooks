@@ -48,4 +48,3 @@
     debug={{ eos.debug|default(omit) }}
   with_items: eos_switchports
   when: eos_switchports is defined
-  register: eos_switchport_output

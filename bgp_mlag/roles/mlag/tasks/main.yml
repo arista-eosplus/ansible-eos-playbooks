@@ -116,7 +116,6 @@
     port={{ eapi.port|default(omit) }}
     debug={{ eos.debug|default(omit) }}
   when: mlag
-  register: mlag_config_output
 
 - name: Disable Spanning Tree on MLAG Vlan
   eos_config:
