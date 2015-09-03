@@ -1,0 +1,19 @@
+---
+- hosts: spine
+  gather_facts: no
+  connection: local
+
+  roles:
+    - common
+    - interfaces
+    - ipv4
+    - bgp
+
+  handlers:
+    - name: send jabber
+      always_run: yes
+      jabber:
+             user=ansible@poc-ansible-blueberg
+             password=eossuper
+             to=noc@conference.poc-ansible-blueberg/ansible
+             msg="ALERT - Configuration has changed on {{ hostname }}."

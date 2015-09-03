@@ -1,0 +1,217 @@
+---
+- name: configure BGP global parameters
+  eos_bgp_config:
+    bgp_as={{ bgp.bgp_as|default(omit) }}
+    enable={{ bgp.enable|default(omit) }}
+    router_id={{ bgp.router_id|default(omit) }}
+    username={{ eapi.username|default(omit) }}
+    password={{ eapi.password|default(omit) }}
+    enablepwd={{ eapi.enablepwd|default(omit) }}
+    transport={{ eapi.transport|default(omit) }}
+    connection={{ eapi.connection|default(omit) }}
+    host={{ eapi.host|default(omit) }}
+    port={{ eapi.port|default(omit) }}
+    debug={{ eos.debug|default(omit) }}
+  when: bgp is defined and bgp.enable
+  notify:
+    - send jabber
+
+- name: set BGP ECMP maximum paths
+  eos_config:
+    section='router bgp {{ bgp.bgp_as }}'
+    command='maximum-paths {{ bgp.maxpaths.paths }} ecmp {{ bgp.maxpaths.ecmp }}'
+    username={{ eapi.username|default(omit) }}
+    password={{ eapi.password|default(omit) }}
+    enablepwd={{ eapi.enablepwd|default(omit) }}
+    transport={{ eapi.transport|default(omit) }}
+    connection={{ eapi.connection|default(omit) }}
+    host={{ eapi.host|default(omit) }}
+    port={{ eapi.port|default(omit) }}
+    debug={{ eos.debug|default(omit) }}
+  when: bgp.maxpaths is defined and bgp.enable
+  notify:
+    - send jabber
+
+- name: configure BGP neighbors
+  eos_bgp_neighbor:
+    name={{ item.name }}
+    remote_as={{ item.remote_as|default(omit) }}
+    enable={{ item.enable|default(omit) }}
+    description={{ item.description|default(omit) }}
+    next_hop_self={{ item.next_hop_self|default(omit) }}
+    peer_group={{ item.peer_group|default(omit) }}
+    route_map_in={{ item.route_map_in|default(omit) }}
+    route_map_out={{ item.route_map_out|default(omit) }}
+    send_community={{ item.send_community|default(omit) }}
+    username={{ eapi.username|default(omit) }}
+    password={{ eapi.password|default(omit) }}
+    enablepwd={{ eapi.enablepwd|default(omit) }}
+    transport={{ eapi.transport|default(omit) }}
+    connection={{ eapi.connection|default(omit) }}
+    host={{ eapi.host|default(omit) }}
+    port={{ eapi.port|default(omit) }}
+    debug={{ eos.debug|default(omit) }}
+  with_items: bgp.neighbors
+  when: bgp.neighbors is defined and bgp.enable
+  register: eos_bgp_neighbor_result
+  notify:
+    - send jabber
+
+- name: set BGP redistribute setting
+  eos_config:
+    section='router bgp {{ bgp.bgp_as }}'
+    regexp='(?<!no )redistribute {{ bgp.redistribute.type }} route-map {{bgp.redistribute.route_map}}'
+    command='redistribute {{ bgp.redistribute.type }} route-map {{bgp.redistribute.route_map}}'
+    username={{ eapi.username|default(omit) }}
+    password={{ eapi.password|default(omit) }}
+    enablepwd={{ eapi.enablepwd|default(omit) }}
+    transport={{ eapi.transport|default(omit) }}
+    connection={{ eapi.connection|default(omit) }}
+    host={{ eapi.host|default(omit) }}
+    port={{ eapi.port|default(omit) }}
+    debug={{ eos.debug|default(omit) }}
+  when: bgp.redistribute is defined and bgp.enable
+  register: bgp_output
+  notify:
+    - send jabber
+
+- name: set BGP log neighbor changes
+  eos_config:
+    section='router bgp {{ bgp.bgp_as }}'
+    regexp='(?<!no )bgp log-neighbor-changes'
+    command='bgp log-neighbor-changes'
+    username={{ eapi.username|default(omit) }}
+    password={{ eapi.password|default(omit) }}
+    enablepwd={{ eapi.enablepwd|default(omit) }}
+    transport={{ eapi.transport|default(omit) }}
+    connection={{ eapi.connection|default(omit) }}
+    host={{ eapi.host|default(omit) }}
+    port={{ eapi.port|default(omit) }}
+    debug={{ eos.debug|default(omit) }}
+  when: bgp.log_neighbor_changes is defined and bgp.enable
+  register: bgp_output
+  notify:
+    - send jabber
+
+- name: set BGP timers
+  eos_config:
+    section='router bgp {{ bgp.bgp_as }}'
+    command='timers bgp {{ bgp.timers.keep_alive }} {{ bgp.timers.hold }}'
+    username={{ eapi.username|default(omit) }}
+    password={{ eapi.password|default(omit) }}
+    enablepwd={{ eapi.enablepwd|default(omit) }}
+    transport={{ eapi.transport|default(omit) }}
+    connection={{ eapi.connection|default(omit) }}
+    host={{ eapi.host|default(omit) }}
+    port={{ eapi.port|default(omit) }}
+    debug={{ eos.debug|default(omit) }}
+  when: bgp.timers is defined and bgp.enable
+  notify:
+    - send jabber
+
+- name: set BGP listeners
+  eos_config:
+    section='router bgp {{ bgp.bgp_as }}'
+    command='bgp listen range {{ item.name }} peer-group {{ item.peer_group }} remote-as {{ item.remote_as }}'
+    username={{ eapi.username|default(omit) }}
+    password={{ eapi.password|default(omit) }}
+    enablepwd={{ eapi.enablepwd|default(omit) }}
+    transport={{ eapi.transport|default(omit) }}
+    connection={{ eapi.connection|default(omit) }}
+    host={{ eapi.host|default(omit) }}
+    port={{ eapi.port|default(omit) }}
+    debug={{ eos.debug|default(omit) }}
+  when: bgp is defined and bgp.enable and bgp.listeners
+  with_items: bgp.listeners | default([])
+  notify:
+    - send jabber
+
+- name: purge BGP neighbors
+  eos_purge:
+    resource=eos_bgp_neighbor
+    results='{{ eos_bgp_neighbor_result|to_nice_json }}'
+    username={{ eapi.username|default(omit) }}
+    password={{ eapi.password|default(omit) }}
+    enablepwd={{ eapi.enablepwd|default(omit) }}
+    transport={{ eapi.transport|default(omit) }}
+    connection={{ eapi.connection|default(omit) }}
+    host={{ eapi.host|default(omit) }}
+    port={{ eapi.port|default(omit) }}
+    debug={{ eos.debug|default(omit) }}
+  when: eos_bgp_neighbor_result is defined and
+        (bgp.enable and purge_bgp_neighbors)
+  notify:
+    - send jabber
+
+- name: configure BGP networks
+  eos_bgp_network:
+    prefix={{ item.prefix }}
+    masklen={{ item.masklen }}
+    route_map={{ item.route_map|default(omit) }}
+    username={{ eapi.username|default(omit) }}
+    password={{ eapi.password|default(omit) }}
+    enablepwd={{ eapi.enablepwd|default(omit) }}
+    transport={{ eapi.transport|default(omit) }}
+    connection={{ eapi.connection|default(omit) }}
+    host={{ eapi.host|default(omit) }}
+    port={{ eapi.port|default(omit) }}
+    debug={{ eos.debug|default(omit) }}
+  with_items: bgp.networks
+  when: bgp.networks is defined and bgp.enable
+  register: eos_bgp_network_result
+  notify:
+    - send jabber
+
+- name: purge BGP networks
+  eos_purge:
+    resource=eos_bgp_network
+    results='{{ eos_bgp_network_result|to_nice_json }}'
+    username={{ eapi.username|default(omit) }}
+    password={{ eapi.password|default(omit) }}
+    enablepwd={{ eapi.enablepwd|default(omit) }}
+    transport={{ eapi.transport|default(omit) }}
+    connection={{ eapi.connection|default(omit) }}
+    host={{ eapi.host|default(omit) }}
+    port={{ eapi.port|default(omit) }}
+    debug={{ eos.debug|default(omit) }}
+  when: eos_bgp_network_result is defined and
+        (bgp.enable and purge_bgp_networks)
+  notify:
+    - send jabber
+
+- name: define ipv6 address families
+  eos_config:
+    section='router bgp {{ bgp.bgp_as }}'
+    subsection='address-family ipv6'
+    command='neighbor {{ item.name }} activate'
+    username={{ eapi.username|default(omit) }}
+    password={{ eapi.password|default(omit) }}
+    enablepwd={{ eapi.enablepwd|default(omit) }}
+    transport={{ eapi.transport|default(omit) }}
+    connection={{ eapi.connection|default(omit) }}
+    host={{ eapi.host|default(omit) }}
+    port={{ eapi.port|default(omit) }}
+    debug={{ eos.debug|default(omit) }}
+  when: item.address_family is defined and bgp.enable and item.address_family.activate
+  with_items: bgp.neighbors
+  notify:
+    - send jabber
+
+- name: vrf BGP neighbors
+  eos_config:
+    section='router bgp {{ bgp.bgp_as }}'
+    subsection='vrf {{ item.vrf }}'
+    command='neighbor {{ item.name }} remote-as {{ item.remote_as }}'
+    username={{ eapi.username|default(omit) }}
+    password={{ eapi.password|default(omit) }}
+    enablepwd={{ eapi.enablepwd|default(omit) }}
+    transport={{ eapi.transport|default(omit) }}
+    connection={{ eapi.connection|default(omit) }}
+    host={{ eapi.host|default(omit) }}
+    port={{ eapi.port|default(omit) }}
+    debug={{ eos.debug|default(omit) }}
+  when: bgp.vrf_neighbors is defined and bgp.enable and item.enable
+  with_items: bgp.vrf_neighbors
+  notify:
+    - send jabber
+

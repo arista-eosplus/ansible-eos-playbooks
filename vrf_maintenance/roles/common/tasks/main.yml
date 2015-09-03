@@ -1,0 +1,67 @@
+---
+- name: Configure Arista EOS hostname
+  eos_system:
+    hostname={{ hostname }}
+    username={{ eapi.username|default(omit) }}
+    password={{ eapi.password|default(omit) }}
+    enablepwd={{ eapi.enablepwd|default(omit) }}
+    transport={{ eapi.transport|default(omit) }}
+    connection={{ eapi.connection|default(omit) }}
+    host={{ eapi.host|default(omit) }}
+    port={{ eapi.port|default(omit) }}
+    debug={{ eos.debug|default(omit) }}
+  when: hostname is defined
+  notify: 
+    - send jabber
+
+- name: Configure VRFs
+  eos_config:
+    section='vrf definition {{ item.name }}'
+    command='rd {{ item.rd }}'
+    username={{ eapi.username|default(omit) }}
+    password={{ eapi.password|default(omit) }}
+    enablepwd={{ eapi.enablepwd|default(omit) }}
+    transport={{ eapi.transport|default(omit) }}
+    connection={{ eapi.connection|default(omit) }}
+    host={{ eapi.host|default(omit) }}
+    port={{ eapi.port|default(omit) }}
+    debug={{ eos.debug|default(omit) }}
+  when: vrfs is defined
+  with_items: vrfs
+  notify:
+    - send jabber
+
+- name: set ip routing
+  eos_config:
+    section='ip routing'
+    command='ip routing'
+    username={{ eapi.username|default(omit) }}
+    password={{ eapi.password|default(omit) }}
+    enablepwd={{ eapi.enablepwd|default(omit) }}
+    transport={{ eapi.transport|default(omit) }}
+    connection={{ eapi.connection|default(omit) }}
+    host={{ eapi.host|default(omit) }}
+    port={{ eapi.port|default(omit) }}
+    debug={{ eos.debug|default(omit) }}
+  when: ip_routing_enabled
+  notify:
+    - send jabber
+
+- name: set vrf ip routing
+  eos_config:
+    regexp='(?<!no )ip routing vrf {{ item.name }}'
+    command='ip routing vrf {{ item.name }}'
+    username={{ eapi.username|default(omit) }}
+    password={{ eapi.password|default(omit) }}
+    enablepwd={{ eapi.enablepwd|default(omit) }}
+    transport={{ eapi.transport|default(omit) }}
+    connection={{ eapi.connection|default(omit) }}
+    host={{ eapi.host|default(omit) }}
+    port={{ eapi.port|default(omit) }}
+    debug={{ eos.debug|default(omit) }}
+  when: vrfs is defined and item.ip_routing_enabled
+  with_items: vrfs
+  notify:
+    - send jabber
+
+

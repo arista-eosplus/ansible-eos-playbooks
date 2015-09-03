@@ -1,0 +1,39 @@
+---
+- name: enter maintenance mode
+  eos_config:
+    section='maintenance'
+    subsection='unit {{ item.unit }}'
+    regexp='(?!=no )quiesce'
+    command='quiesce'
+    username={{ eapi.username|default(omit) }}
+    password={{ eapi.password|default(omit) }}
+    enablepwd={{ eapi.enablepwd|default(omit) }}
+    transport={{ eapi.transport|default(omit) }}
+    connection={{ eapi.connection|default(omit) }}
+    host={{ eapi.host|default(omit) }}
+    port={{ eapi.port|default(omit) }}
+    debug={{ eos.debug|default(omit) }}
+  when: maintenance is defined and item.quiesce
+  with_items: maintenance
+  notify:
+    - jabber enable maintenance
+
+- name: exit maintenance mode
+  eos_config:
+    section='maintenance'
+    subsection='unit {{ item.unit }}'
+    regexp='(?<=no )quiesce'
+    command='no quiesce'
+    username={{ eapi.username|default(omit) }}
+    password={{ eapi.password|default(omit) }}
+    enablepwd={{ eapi.enablepwd|default(omit) }}
+    transport={{ eapi.transport|default(omit) }}
+    connection={{ eapi.connection|default(omit) }}
+    host={{ eapi.host|default(omit) }}
+    port={{ eapi.port|default(omit) }}
+    debug={{ eos.debug|default(omit) }}
+  when: maintenance is defined and not item.quiesce
+  with_items: maintenance
+  notify:
+    - jabber disable maintenance
+

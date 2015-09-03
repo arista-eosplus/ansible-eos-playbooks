@@ -1,0 +1,120 @@
+---
+hostname: leaf1
+
+vlans:
+  - vlanid: 1
+  - vlanid: 1001
+    vni: 1001001
+  - vlanid: 1002
+    vni: 1001002
+  - vlanid: 1004
+    name: Multicast
+  - vlanid: 1005
+    name: default-vrf-mcast
+  - vlanid: 1006
+
+interfaces:
+  - name: Loopback0
+    enable: true
+  - name: Loopback1
+    enable: true
+  - name: Ethernet25
+    description: "Ixia"
+    enable: true
+  - name: Ethernet26
+    description: "Ixia"
+    enable: true
+  - name: Ethernet49/1
+    description: "spine1-et6/1/1"
+    speed: forced 40gfull
+    enable: true
+  - name: Ethernet49/1.101
+    enable: true
+  - name: Ethernet50/1
+    description: "tg252-et3/1/1"
+    speed: forced 40gfull
+    enable: true
+  - name: Ethernet50/1.101
+    enable: true
+  - name: Vlan1002
+    enable: true
+  - name: Vlan1004
+    enable: true
+  - name: Vlan1006
+    enable: true
+
+eos_switchports:
+  - name: Ethernet25
+    mode: trunk
+    trunk_allowed_vlans: 1001-1003
+  - name: Ethernet26
+    mode: trunk
+    trunk_allowed_vlans: 1001-1003
+
+ip_interfaces:
+  - name: Loopback0
+    address: 161.0.1.1/32
+  - name: Loopback1
+    address: 161.1.1.1/32
+  - name: Ethernet49/1
+    address: 101.0.1.1/31
+  - name: Ethernet49/1.101
+    address: 101.1.1.1/31
+    dot1q_vlan: 101
+    vrf: blue
+  - name: Ethernet50/1
+    address: 101.0.1.9/31
+  - name: Ethernet50/1.101
+    address: 101.1.1.9/31
+    dot1q_vlan: 101
+    vrf: blue
+  - name: Vlan1002
+    address: 192.168.2.2/24
+  - name: Vlan1004
+    address: 192.168.101.1/24
+    vrf: blue
+  - name: Vlan1006
+    vrf: ansible_blue
+    address: 101.1.1.9/31
+
+bgp:
+  enable: true
+  bgp_as: 65101
+  router_id: 161.1.1.1
+  maxpaths:
+    paths: 4
+    ecmp: 4
+  redistribute: 
+    type: connected
+    route_map: not_in_bgp
+  neighbors:
+    - name: 101.0.1.0
+      remote_as: 65100
+      enable: true
+    - name: 101.0.1.8
+      remote_as: 65100
+      enable: true
+    - name: 2001::101:0:1:0
+      remote_as: 65100
+      enable: true
+      address_family:
+        activate: true
+    - name: 2001::101:0:1:8
+      remote_as: 65100
+      enable: true
+      address_family:
+        activate: true
+  vrf_neighbors:
+    - name: 101.1.1.0
+      remote_as: 65100
+      enable: true
+      vrf: blue
+    - name: 101.1.1.8
+      remote_as: 65100
+      enable: true
+      vrf: blue
+    - name: 101.1.1.0
+      remote_as: 65100
+      enable: true
+      vrf: TEST
+

@@ -1,0 +1,36 @@
+---
+- name: Configure Arista EOS interfaces
+  eos_interface:
+    name={{ item.name }}
+    description="{{ item.description|default(omit) }}"
+    enable={{ item.enable|default(omit) }}
+    username={{ eapi.username|default(omit) }}
+    password={{ eapi.password|default(omit) }}
+    enablepwd={{ eapi.enablepwd|default(omit) }}
+    transport={{ eapi.transport|default(omit) }}
+    connection={{ eapi.connection|default(omit) }}
+    host={{ eapi.host|default(omit) }}
+    port={{ eapi.port|default(omit) }}
+    debug={{ eos.debug|default(omit) }}
+  with_items: interfaces
+  when: interfaces is defined
+  notify:
+    - send jabber
+
+- name: Set interface speed
+  eos_config:
+    section='interface {{ item.name }}'
+    command='speed {{ item.speed }}'
+    username={{ eapi.username|default(omit) }}
+    password={{ eapi.password|default(omit) }}
+    enablepwd={{ eapi.enablepwd|default(omit) }}
+    transport={{ eapi.transport|default(omit) }}
+    connection={{ eapi.connection|default(omit) }}
+    host={{ eapi.host|default(omit) }}
+    port={{ eapi.port|default(omit) }}
+    debug={{ eos.debug|default(omit) }}
+  with_items: interfaces
+  when: item.speed is defined
+  notify:
+    - send jabber
+

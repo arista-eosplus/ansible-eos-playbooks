@@ -1,0 +1,52 @@
+---
+- name: Configure Arista EOS IP interfaces
+  eos_ipinterface:
+    name={{ item.name }}
+    address={{ item.address }}
+    username={{ eapi.username|default(omit) }}
+    password={{ eapi.password|default(omit) }}
+    enablepwd={{ eapi.enablepwd|default(omit) }}
+    transport={{ eapi.transport|default(omit) }}
+    connection={{ eapi.connection|default(omit) }}
+    host={{ eapi.host|default(omit) }}
+    port={{ eapi.port|default(omit) }}
+    debug={{ eos.debug|default(omit) }}
+  with_items: ip_interfaces
+  when: ip_interfaces is defined
+  notify:
+    - send jabber
+
+- name: Configure Arista EOS IP interface VRF
+  eos_config:
+    section='interface {{ item.name }}'
+    command='vrf forwarding {{ item.vrf }}'
+    username={{ eapi.username|default(omit) }}
+    password={{ eapi.password|default(omit) }}
+    enablepwd={{ eapi.enablepwd|default(omit) }}
+    transport={{ eapi.transport|default(omit) }}
+    connection={{ eapi.connection|default(omit) }}
+    host={{ eapi.host|default(omit) }}
+    port={{ eapi.port|default(omit) }}
+    debug={{ eos.debug|default(omit) }}
+  with_items: ip_interfaces
+  when: ip_interfaces is defined and item.vrf is defined
+  notify:
+    - send jabber
+
+- name: Configure Arista EOS IP sub-interface encapsulation
+  eos_config:
+    section='interface {{ item.name }}'
+    command='encapsulation dot1q vlan {{ item.dot1q_vlan }}'
+    username={{ eapi.username|default(omit) }}
+    password={{ eapi.password|default(omit) }}
+    enablepwd={{ eapi.enablepwd|default(omit) }}
+    transport={{ eapi.transport|default(omit) }}
+    connection={{ eapi.connection|default(omit) }}
+    host={{ eapi.host|default(omit) }}
+    port={{ eapi.port|default(omit) }}
+    debug={{ eos.debug|default(omit) }}
+  with_items: ip_interfaces
+  when: item.dot1q_vlan is defined
+  notify:
+    - send jabber
+

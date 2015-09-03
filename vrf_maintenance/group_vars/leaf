@@ -1,0 +1,10 @@
+---
+purge_vlans: false
+
+ip_routing_enabled: true
+
+vxlan:
+  name: Vxlan1
+  enable: true
+  source_interface: Loopback0
+   

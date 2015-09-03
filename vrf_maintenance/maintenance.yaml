@@ -1,0 +1,24 @@
+---
+- hosts: spine
+  gather_facts: no
+  connection: local
+
+  roles:
+    - maintenance
+
+  handlers:
+    - name: jabber enable maintenance
+      always_run: yes
+      jabber:
+             user=ansible@poc-ansible-blueberg
+             password=eossuper
+             to=noc@conference.poc-ansible-blueberg/ansible
+             msg="ALERT - Maintenance mode ENABLED on {{ hostname }}."
+    - name: jabber disable maintenance
+      always_run: yes
+      jabber:
+             user=ansible@poc-ansible-blueberg
+             password=eossuper
+             to=noc@conference.poc-ansible-blueberg/ansible
+             msg="ALERT - Maintenance mode DISABLED on {{ hostname }}."
+

@@ -1,0 +1,15 @@
+---
+eapi:
+  connection: "{{ inventory_hostname }}"
+#  config: ../eapi.conf
+
+eos:
+  debug: true
+
+vrfs:
+  - name: blue
+    rd: "101:101"
+    ip_routing_enabled: true
+  - name: ansible_blue
+    rd: "100:100"
+    ip_routing_enabled: true

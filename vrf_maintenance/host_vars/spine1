@@ -1,0 +1,62 @@
+---
+hostname: spine1
+
+maintenance:
+  - unit: System
+    quiesce: false
+
+interfaces:
+  - name: Loopback0
+    enable: true
+  - name: Loopback1
+    enable: true
+  - name: Ethernet3/1/1
+    description: "leaf1-et49/1"
+    enable: true
+    speed: forced 40gfull
+  - name: Ethernet3/1/1.101
+    enable: true
+  - name: Ethernet3/7/1
+    description: "do387-et49/1"
+    enable: true
+    speed: forced 40gfull
+  - name: Ethernet3/7/1.101
+    enable: true
+
+ip_interfaces:
+  - name: Loopback0
+    address: 161.0.1.9/32
+  - name: Loopback1
+    address: 161.1.1.9/32
+  - name: Ethernet3/1/1
+    address: 101.0.1.0/31
+  - name: Ethernet3/1/1.101
+    address: 101.1.1.0/31
+    dot1q_vlan: 101
+    vrf: blue
+  - name: Ethernet3/7/1
+    address: 101.0.1.4/31
+  - name: Ethernet3/7/1.101
+    address: 101.1.1.4/31
+    dot1q_vlan: 101
+    vrf: blue
+
+bgp:
+  enable: true
+  bgp_as: 65100
+  router_id: 161.1.1.9
+  maxpaths:
+    paths: 8
+    ecmp: 8
+  redistribute: 
+    type: connected
+    route_map: not_in_bgp
+  neighbors:
+    - name: 101.0.1.1
+      remote_as: 65101
+      send_community: true
+      enable: true
+    - name: 101.0.1.3
+      remote_as: 65102
+      send_community: true
+      enable: true
