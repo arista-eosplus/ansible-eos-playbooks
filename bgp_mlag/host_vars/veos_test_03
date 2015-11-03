@@ -74,7 +74,6 @@ bgp:
   bgp_as: 65002
   redistribute:
     - connected
-    - static
   log_neighbor_changes: yes
   timers:
     keep_alive: 1
