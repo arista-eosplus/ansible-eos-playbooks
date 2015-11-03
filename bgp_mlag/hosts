@@ -1,17 +1,7 @@
-[arista-leaf]
-veos_test_03
-veos_test_04
+[leaf]
+dc1-tora
+dc1-torb
 
-[arista-spine]
-veos_test_01
-veos_test_02
-
-[spine:children]
-arista-spine
-
-[leaf:children]
-arista-leaf
-
-[arista:children]
-arista-spine
-arista-leaf
+[spine]
+dc1-spine1
+dc1-spine2
