@@ -29,10 +29,39 @@ ip_interfaces:
   - name: Ethernet2
     address: 10.1.1.2/31
 
+routemaps:
+  - name: RM-1
+    action: permit
+    seqno: 10
+    description: My wonderful routemap
+    match:
+      - as 1000
+      - source-protocol bgp
+    continue: 20
+
+acls:
+  - name: ACL-1
+    action: permit
+    seqno: 50
+    description: My wonderful acl
+    type: standard
+    srcaddr: 10.10.10.10
+    srcprefixlen: 32
+
+ipv4_static_routes:
+  - ip_dest: 0.0.0.0/0
+    next_hop: Management1
+    next_hop_ip: 172.16.130.2
+    route_name: Default
+    tag: 100
+
+
 bgp:
   enable: true
   bgp_as: 65001
-  redistribute: connected
+  redistribute:
+    - connected
+    - static
   log_neighbor_changes: yes
   timers:
     keep_alive: 1
